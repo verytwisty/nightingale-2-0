@@ -77,16 +77,5 @@
     <div id="content" class="nhsuk-width-container nhsuk-width-container--full">
 
 
-
-
-
-        <?php
-        // add ACF generated HERO block
-        if (is_singular()) {
-            include_once('wp-content/plugins/nhsl-blocks/blocks/content-hero.php');
-        }
-        //end hero image section
-
-        ?>
         <main class="nhsuk-main-wrapper nhsuk-main-wrapper--no-padding" id="maincontent">
             <div id="contentinner" class="nhsuk-width-container">

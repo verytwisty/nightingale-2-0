@@ -43,7 +43,7 @@ registerBlockType("nhsblocks/latestnews", {
     }
 
     return (
-        <div className="nhsuk-grid-column-one-'.$width.' nhsuk-panel-group__item">
+        <div className="nhsuk-grid-column-one-third nhsuk-panel-group__item">
           <div className="nhsuk-panel">
               <h3>
                 <RichText.Content value={post.title.rendered} />
