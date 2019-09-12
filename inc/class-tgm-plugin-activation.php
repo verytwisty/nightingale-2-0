@@ -258,8 +258,6 @@ if ( ! class_exists( 'TGM_Plugin_Activation' ) ) {
 
 			// Announce that the class is ready, and pass the object (for advanced use).
 			do_action_ref_array( 'tgmpa_init', array( $this ) );
-
-
 			// When the rest of WP has loaded, kick-start the rest of the class.
 			add_action( 'init', array( $this, 'init' ) );
 		}
@@ -1022,7 +1020,7 @@ if ( ! class_exists( 'TGM_Plugin_Activation' ) ) {
 				if ( ! $automatic ) {
 					// Make sure message doesn't display again if bulk activation is performed
 					// immediately after a single activation.
-					if ( ! isset( $_POST['action'] ) ) { // phpcs:ignore Standard.Category.SniffName.ErrorCode.
+					if ( ! isset( $_POST['action'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
 						echo '<div id="message" class="error"><p>',
 						sprintf(
 							esc_html( $this->strings['plugin_needs_higher_version'] ),
@@ -1345,7 +1343,7 @@ if ( ! class_exists( 'TGM_Plugin_Activation' ) ) {
 			$plugin['force_deactivation'] = TGMPA_Utils::validate_bool( $plugin['force_deactivation'] );
 
 			// Enrich the received data.
-			$plugin['file_path']   = $this->_get_plugin_basename_from_slug( $plugin['slug'] );
+			$plugin['file_path']   = $this->nightingale_plugin_basename_from_slug( $plugin['slug'] );
 			$plugin['source_type'] = $this->get_plugin_source_type( $plugin['source'] );
 
 			// Set the class properties.
@@ -1487,11 +1485,11 @@ if ( ! class_exists( 'TGM_Plugin_Activation' ) ) {
 		 */
 		public function populate_file_path( $plugin_slug = '' ) {
 			if ( ! empty( $plugin_slug ) && is_string( $plugin_slug ) && isset( $this->plugins[ $plugin_slug ] ) ) {
-				$this->plugins[ $plugin_slug ]['file_path'] = $this->_get_plugin_basename_from_slug( $plugin_slug );
+				$this->plugins[ $plugin_slug ]['file_path'] = $this->nightingale_plugin_basename_from_slug( $plugin_slug );
 			} else {
 				// Add file_path key for all plugins.
 				foreach ( $this->plugins as $slug => $values ) {
-					$this->plugins[ $slug ]['file_path'] = $this->_get_plugin_basename_from_slug( $slug );
+					$this->plugins[ $slug ]['file_path'] = $this->nightingale_plugin_basename_from_slug( $slug );
 				}
 			}
 		}
@@ -1506,7 +1504,7 @@ if ( ! class_exists( 'TGM_Plugin_Activation' ) ) {
 		 *
 		 * @return string Either file path for plugin if installed, or just the plugin slug.
 		 */
-		protected function _get_plugin_basename_from_slug( $slug ) {
+		protected function nightingale_plugin_basename_from_slug( $slug ) {
 			$keys = array_keys( $this->get_plugins() );
 
 			foreach ( $keys as $key ) {
@@ -1531,7 +1529,7 @@ if ( ! class_exists( 'TGM_Plugin_Activation' ) ) {
 		 *
 		 * @return string|boolean Plugin slug if found, false otherwise.
 		 */
-		public function _get_plugin_data_from_name( $name, $data = 'slug' ) {
+		public function nightingale_plugin_data_from_name( $name, $data = 'slug' ) {
 			foreach ( $this->plugins as $values ) {
 				if ( $name === $values['name'] && isset( $values[ $data ] ) ) {
 					return $values[ $data ];
@@ -1671,7 +1669,7 @@ if ( ! class_exists( 'TGM_Plugin_Activation' ) ) {
 		 * @return boolean True when on the TGMPA page, false otherwise.
 		 */
 		protected function is_tgmpa_page() {
-			return isset( $_GET['page'] ) && $this->menu === $_GET['page'];
+			return isset( $_GET['page'] ) && $this->menu === $_GET['page']; // phpcs:ignore WordPress.Security.NonceVerifcation.Recommended
 		}
 
 		/**
@@ -1692,10 +1690,10 @@ if ( ! class_exists( 'TGM_Plugin_Activation' ) ) {
 			if ( 'update-core' === $screen->base ) {
 				// Core update screen.
 				return true;
-			} elseif ( 'plugins' === $screen->base && ! empty( $_POST['action'] ) ) { // phpcs:ignore Standard.Category.SniffName.ErrorCode.
+			} elseif ( 'plugins' === $screen->base && ! empty( $_POST['action'] ) ) { // phpcs:ignore WordPress.Security.NonceVerifcation.Recommended
 				// Plugins bulk update screen.
 				return true;
-			} elseif ( 'update' === $screen->base && ! empty( $_POST['action'] ) ) { // phpcs:ignore Standard.Category.SniffName.ErrorCode.
+			} elseif ( 'update' === $screen->base && ! empty( $_POST['action'] ) ) { // phpcs:ignore WordPress.Security.NonceVerifcation.Recommended
 				// Individual updates (ajax call).
 				return true;
 			}
@@ -2043,7 +2041,7 @@ if ( ! class_exists( 'TGM_Plugin_Activation' ) ) {
 			echo '<p style="float: right; padding: 0em 1.5em 0.5em 0;"><strong><small>',
 			esc_html(
 				sprintf(
-					/* translators: %s: version number */
+				/* translators: %s: version number */
 					__( 'TGMPA v%s', 'nightingale' ),
 					self::TGMPA_VERSION
 				)
@@ -2201,15 +2199,15 @@ if ( ! class_exists( 'TGMPA_List_Table' ) ) {
 				)
 			);
 
-			if ( isset( $_REQUEST['plugin_status'] ) && in_array(
-				$_REQUEST['plugin_status'],
-				array(
-					'install',
-					'update',
-					'activate',
-				),
-				true
-			)
+			if ( isset( $_REQUEST['plugin_status'] ) && in_array( // phpcs:ignore WordPress.Security.NonceVerifcation.Recommended
+					$_REQUEST['plugin_status'],
+					array(
+						'install',
+						'update',
+						'activate',
+					),
+					true
+				)
 			) {
 				$this->view_context = sanitize_key( $_REQUEST['plugin_status'] );
 			}
@@ -2237,7 +2235,7 @@ if ( ! class_exists( 'TGMPA_List_Table' ) ) {
 		 *
 		 * @return array $table_data Information for use in table.
 		 */
-		protected function _gather_plugin_data() {
+		protected function nightingale_gather_plugin_data_data() {
 			// Load thickbox for plugin links.
 			$this->tgmpa->admin_init();
 			$this->tgmpa->thickbox();
@@ -2415,7 +2413,7 @@ if ( ! class_exists( 'TGMPA_List_Table' ) ) {
 			}
 
 			return sprintf(
-				/* translators: 1: install status, 2: update status */
+			/* translators: 1: install status, 2: update status */
 				_x( '%1$s, %2$s', 'Install/Update Status', 'nightingale' ),
 				$install_status,
 				$update_status
@@ -3079,7 +3077,7 @@ if ( ! class_exists( 'TGMPA_List_Table' ) ) {
 			}
 
 			// Store all of our plugin data into $items array so WP_List_Table can use it.
-			$this->items = apply_filters( 'tgmpa_table_data_items', $this->_gather_plugin_data() );
+			$this->items = apply_filters( 'tgmpa_table_data_items', $this->nightingale_gather_plugin_data_data() );
 		}
 
 		/* *********** DEPRECATED METHODS *********** */
@@ -3088,18 +3086,18 @@ if ( ! class_exists( 'TGMPA_List_Table' ) ) {
 		 * Retrieve plugin data, given the plugin name.
 		 *
 		 * @since      2.2.0
-		 * @deprecated 2.5.0 use {@see TGM_Plugin_Activation::_get_plugin_data_from_name()} instead.
-		 * @see        TGM_Plugin_Activation::_get_plugin_data_from_name()
+		 * @deprecated 2.5.0 use {@see TGM_Plugin_Activation::nightingale_plugin_data_from_name()} instead.
+		 * @see        TGM_Plugin_Activation::nightingale_plugin_data_from_name()
 		 *
 		 * @param string $name Name of the plugin, as it was registered.
 		 * @param string $data Optional. Array key of plugin data to return. Default is slug.
 		 *
 		 * @return string|boolean Plugin slug if found, false otherwise.
 		 */
-		protected function _get_plugin_data_from_name( $name, $data = 'slug' ) {
-			_deprecated_function( __FUNCTION__, 'TGMPA 2.5.0', 'TGM_Plugin_Activation::_get_plugin_data_from_name()' );
+		protected function nightingale_plugin_data_from_name( $name, $data = 'slug' ) {
+			_deprecated_function( __FUNCTION__, 'TGMPA 2.5.0', 'TGM_Plugin_Activation::nightingale_plugin_data_from_name()' );
 
-			return $this->tgmpa->_get_plugin_data_from_name( $name, $data );
+			return $this->tgmpa->nightingale_plugin_data_from_name( $name, $data );
 		}
 	}
 }
@@ -3156,7 +3154,7 @@ if ( ! function_exists( 'tgmpa_load_bulk_installer' ) ) {
 		// Get TGMPA class instance.
 		$tgmpa_instance = call_user_func( array( get_class( $GLOBALS['tgmpa'] ), 'get_instance' ) );
 
-		if ( isset( $_GET['page'] ) && $tgmpa_instance->menu === $_GET['page'] ) {
+		if ( isset( $_GET['page'] ) && $tgmpa_instance->menu === $_GET['page'] ) { // phpcs:ignore WordPress.Security.NonceVerifcation.Recommended
 			if ( ! class_exists( 'Plugin_Upgrader', false ) ) {
 				require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 			}
