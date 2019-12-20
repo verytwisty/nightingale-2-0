@@ -12,7 +12,7 @@
 get_header();
 ?>
 
-	<div id="primary" class=" nhsuk-grid-row">
+	<div id="primary" class=" nhsuk-grid-row 123">
 		<div class="nhsuk-grid-column-full">
 
 			<?php
@@ -20,8 +20,21 @@ get_header();
 				the_post();
 
 				get_template_part( 'template-parts/content', get_post_type() );
+				$defaults = array(
+					'before'           => '<p>' . __( 'Pages:', 'nightingale' ),
+					'after'            => '</p>',
+					'link_before'      => '',
+					'link_after'       => '',
+					'next_or_number'   => 'number',
+					'separator'        => ' ',
+					'nextpagelink'     => __( 'Next page', 'nightingale' ),
+					'previouspagelink' => __( 'Previous page', 'nightingale' ),
+					'pagelink'         => '%',
+					'echo'             => 1,
+				);
 
-				the_post_navigation();
+				wp_link_pages( $defaults );
+				nightingale_get_prev_next();
 
 				// If comments are open or we have at least one comment, load up the comment template.
 				if ( comments_open() || get_comments_number() ) :

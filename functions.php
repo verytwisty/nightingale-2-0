@@ -6,7 +6,7 @@
  *
  * @package Nightingale
  * @copyright NHS Leadership Academy, Tony Blacker
- * @version 2.0.3 5th September 2019
+ * @version 2.0.5 19th November 2019
  */
 
 /**
@@ -119,7 +119,7 @@ function nightingale_setup() {
 				'WP_Widget_Archives',
 				'WP_Widget_Tag_Cloud',
 				'WP_Widget_Recent_Posts',
-			)
+			),
 		),
 		'posts'      => array(
 			'home',
@@ -162,11 +162,6 @@ function nightingale_setup() {
 	remove_theme_support( 'custom-header' );
 	remove_theme_support( 'custom-background' );
 	unregister_widget( 'WP_Widget_Search' ); // taking out search widget as included in header by default.
-
-	/**
-	 * Disable XML RPC by default
-	 */
-	add_filter( 'xmlrpc_enabled', '__return_false' );
 
 }
 
@@ -222,7 +217,7 @@ function nightingale_widgets_init() {
 			'before_widget' => '<div id="%1$s" class="%2$s nhsuk-panel-with-label">',
 			'after_widget'  => '</div>',
 			'before_title'  => '<h3 class="nhsuk-panel-with-label__label">',
-			'after_title'   => '</h3>'
+			'after_title'   => '</h3>',
 		)
 	);
 }
@@ -233,7 +228,7 @@ add_action( 'widgets_init', 'nightingale_widgets_init' );
  * Enqueue scripts and styles.
  */
 function nightingale_scripts() {
-	wp_enqueue_style( 'nightingale-style', get_stylesheet_uri(), array(), '20190828' );
+	wp_enqueue_style( 'nightingale-style', get_template_directory_uri() . '/style.min.css', array(), '20191012' );
 
 	wp_enqueue_script( 'nightingale-navigation', get_template_directory_uri() . '/js/navigation.js', '', '20190828', true );
 
@@ -369,7 +364,7 @@ function nightingale_admin_notice_demo_data() {
 			</svg>';
 		echo '<strong style="font-size: 20px; padding-bottom: 10px; display: block;">';
 		printf(
-		/* translators: 1: theme name. */
+			/* translators: 1: theme name. */
 			esc_html__(
 				'Thank you for installing %1$s',
 				'nightingale'
@@ -407,6 +402,11 @@ require get_template_directory() . '/inc/custom-gutenberg.php';
 require get_template_directory() . '/inc/customizer.php';
 
 /**
+ * Login Screen
+ */
+require get_template_directory() . '/inc/login.php';
+
+/**
  * Pagination
  */
 require get_template_directory() . '/inc/pagination.php';
@@ -417,12 +417,28 @@ require get_template_directory() . '/inc/pagination.php';
 require get_template_directory() . '/inc/breadcrumbs.php';
 
 /**
+ * Create an array of active plugins.
+ */
+
+$active_plugins = apply_filters( 'active_plugins', get_option( 'active_plugins' ) );
+
+/**
  * Gravity Forms style over-ride.
  */
-if ( !is_admin() ) {
-	require get_template_directory() . '/inc/gravity-forms.php';
+if ( in_array( 'gravityforms/gravityforms.php', $active_plugins, true ) ) {
+	if ( ! is_admin() ) {
+		require get_template_directory() . '/inc/gravity-forms.php';
+	}
 }
 
+/**
+ * LearnDash style over-ride.
+ */
+if ( in_array( 'sfwd-lms/sfwd-lms.php', $active_plugins, true ) ) {
+	if ( ! is_admin() ) {
+		require get_template_directory() . '/inc/learndash.php';
+	}
+}
 /**
  * Retina Ready Image code.
  */
@@ -437,6 +453,11 @@ require get_template_directory() . '/inc/performance-optimisations.php';
  * Shove the critical path css directly into the header.
  */
 require get_template_directory() . '/inc/critical-style.php';
+
+/**
+ * Add a pill next to comment author name showing their user role.
+ */
+require get_template_directory() . '/inc/class-comment-author-role-label.php';
 
 add_filter( 'render_block', 'nightingale_latest_posts_block_filter', 10, 3 );
 
@@ -455,19 +476,20 @@ function nightingale_latest_posts_block_filter( $block_content, $block ) {
 	}
 	$output = '<div class="nhsuk-grid-row nightingale-latest-news"><div class="nhsuk-panel-group">';
 	$dom    = new DOMDocument();
+	libxml_use_internal_errors( true );
 	$dom->loadHTML( $block_content );
 	$lis = $dom->getElementsByTagName( 'li' );
 	foreach ( $lis as $li ) {
-		$output   .= '<div class="nhsuk-grid-column-one-third nhsuk-panel-group__item"><div class="nhsuk-panel">';
+		$output  .= '<div class="nhsuk-grid-column-one-third nhsuk-panel-group__item"><div class="nhsuk-panel">';
 		$titles   = $li->getElementsByTagName( 'a' );
 		$title    = $titles->item( 0 )->nodeValue;
 		$link     = $titles->item( 0 )->getAttribute( 'href' );
 		$contents = $li->getElementsByTagName( 'div' );
 		$excerpt  = $contents->item( 0 )->nodeValue;
-		$output   .= '<h3><a href="' . $link . '"> ' . $title . '</a></h3>';
-		$output   .= '<p>' . substr( $excerpt, 0, - 13 ) . '</p>';
-		$output   .= nightingale_read_more_posts( $title, $link );
-		$output   .= '</div></div>';
+		$output  .= '<h3><a href="' . $link . '"> ' . $title . '</a></h3>';
+		$output  .= '<p>' . substr( $excerpt, 0, - 13 ) . '</p>';
+		$output  .= nightingale_read_more_posts( $title, $link );
+		$output  .= '</div></div>';
 	}
 	$output .= '</div></div>';
 

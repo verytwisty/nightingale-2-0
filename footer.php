@@ -10,6 +10,7 @@
  * @copyright NHS Leadership Academy, Tony Blacker
  * @version 1.1 21st August 2019
  */
+
 flush();
 ?>
 </div>
@@ -23,7 +24,7 @@ flush();
 				<div id="nhsuk-footer-widgets" class="nhsuk-footer__widgets widget-area" role="complementary">
 					<?php dynamic_sidebar( 'footer-region' ); ?>
 				</div>
-			<?php
+				<?php
 			endif;
 			$menu_locations = get_nav_menu_locations(); // Get our nav locations (set in our theme, usually functions.php).
 			// This returns an array of menu locations ([LOCATION_NAME] = MENU_ID).
@@ -38,7 +39,7 @@ flush();
 
 						foreach ( $menu_item as $nav_item ) {
 
-							echo '<li class="nhsuk-footer__list-item"><a class="nhsuk-footer__list-item-link" href="' . esc_url( $nav_item->url ) . '" title="' . esc_html( $nav_item->title ) . '">' . esc_html( $nav_item->title ) . '</a></li>';
+							echo '<li class="nhsuk-footer__list-item"><a class="nhsuk-footer__list-item-link" href="' . esc_url( $nav_item->url ) . '">' . esc_html( $nav_item->title ) . '</a></li>';
 
 						}
 
@@ -53,6 +54,9 @@ flush();
 		</div>
 	</div>
 </footer>
+<!--
+-- FzwfoYNPKdzf5LLgTGsAAz6xb8lqM8ObevYAW5CV9mBAbpDtfV057ndBJWDFrT7P --
+-->
 <?php
 if ( get_theme_mod( 'feedback_on' ) === 'yes' ) {
 	get_template_part( 'partials/feedback-banner' );

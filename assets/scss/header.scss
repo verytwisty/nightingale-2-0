@@ -1,59 +1,32 @@
-.nhsuk-header--transactional {
-  .nhsuk-header__logo {
-    height: auto;
-    a.nhsuk-header__link {
-      height: auto;
-      width: auto;
-      text-decoration: none;
+.nhsuk-header {
+  .nhsuk-header__navigation {
+    max-width: 100%;
+  }
 
-      .nhsuk-header__transactional-service-name {
-        width: max-content;
-        color: $color_nhsuk-white;
-        font-size: 1.25rem;
-        font-weight: 700;
-        padding: 20px 10px 20px 100px;
-        position: absolute;
-        top: 30px;
-      }
+  .nhsuk-header__search-wrap input[type="text"] {
+    border-radius: 3px 0px 0px 3px;
 
-      .nhsuk-header__organisational-service-name {
-        width: max-content;
-        color: $color_nhsuk-white;
-        font-size: 1.25rem;
-        font-weight: 700;
-        padding: 0 10px 0 0;
-      }
+    &:focus {
 
-      .nhsuk-header__organisational-qualifier {
-        color: $color_nhsuk-white;
-        width: max-content;
-        padding: 0;
-      }
     }
   }
-  .nhsuk-header__inverted {
-    .nhsuk-header__logo {
-      a.nhsuk-header__link {
-        .nhsuk-header__transactional-service-name, .nhsuk-header__organisational-service-name {
-          color: $color-nhsuk-black;
-        }
-
-        .nhsuk-header__organisational-qualifier {
-          color: $color-nhsuk-bright-blue;
-        }
-      }
-    }
-    background: $color_nhsuk-white;
+  .autocomplete-container {
+    float: left;
+  }
+  .nhsuk-u-visually-hidden {
     color: $color_nhsuk-black;
+    background: $color_nhsuk-white;
+    padding: 10px;
+  }
+  &.nhsuk-header__white {
+    .nhsuk-header__search-wrap input[type="text"] {
+      border: 1px solid $nhsuk-border-color;
+    }
 
     a.nhsuk-header__transactional-service-name--link {
       color: $color_nhsuk-blue;
     }
 
-    .nhsuk_header__logo {
-      padding: 0 0 10px 0;
-
-    }
 
     .nhsuk-header__menu {
       .nhsuk-header__menu-toggle {
@@ -97,7 +70,22 @@
       }
     }
   }
+
+  .nhsuk-header__menu-toggle {
+    margin-right: -4px;
+  }
+
+  @media (min-width: 40.0625em) {
+    margin-top: 0;
+  }
+  @media (max-width: 40.0525em) {
+    .autocomplete__input {
+      height: 52px;
+    }
+
+  }
 }
-.nhsuk-header__menu-toggle {
-  margin-right: 0;
+.nhsuk-header__container {
+  padding-bottom: 20px;
+  min-height: 80px;
 }

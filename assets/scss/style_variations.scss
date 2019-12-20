@@ -1,15 +1,15 @@
 /*
 // variations to styling required for gutenberg native blocks
 // @author Tony Blacker, NHS Leadership Academy
-// @version 1.0 22nd July 2019
+// @version 1.1 12th October 2019
 */
 
 .nhsuk-grid-column-full > :first-child {
-  padding-left: 16px !important;
+  padding-left: 0px !important;
 }
 
 .nhsuk-grid-column-full > :last-child {
-  padding-right: 16px !important;
+  padding-right: 0px !important;
 }
 
 
@@ -43,40 +43,24 @@
   clear: both;
 }
 
-//Gravity forms gumpfh
-.gform_heading {
-  .gform_description {
-    font-size: 1rem;
-    font-weight: 700;
-  }
-}
-.gform_body {
-  padding-top: 30px;
-
-  ul.gform_fields {
-    list-style: none;
-    margin-left: 0;
-    padding-left: 0;
-
-    .nhsuk-required-message {
-      font-weight: bold;
-      font-style: italic;
-      padding-left: 20px;
+/* login form customisation */
+#login {
+  padding-top: 0 !important;
+  width: 90%;
+  #loginform {
+    margin-top: 0;
+    box-shadow: none;
+    #wp-submit {
+      @extend .nhsuk-button;
+      height: auto;
     }
 
-    .nhsuk-textarea {
-      min-height: 200px;
+    .user-login, .user_pass {
+      @extend .nhsuk-input;
     }
 
-    .gform_hidden {
-      display: none;
-    }
-  }
-  .gform_wrapper {
-    li.gfield fieldset {
-      .nhsuk-textarea {
-        width: 100%;
-      }
+    label {
+      @extend .nhsuk-label;
     }
   }
 }
