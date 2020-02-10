@@ -66,11 +66,14 @@ echo '<header class="nhsuk-header nhsuk-header--' . esc_html( $header_layout . $
 </div>
 <?php
 get_template_part( 'partials/topnav' );
+
+$full_width_template = is_page_template('full-width-stripes-page.php');
+
 ?>
 </header>
 <?php echo nightingale_breadcrumb(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 <div id="content" class="nhsuk-width-container nhsuk-width-container--full">
 	<main class="nhsuk-main-wrapper nhsuk-main-wrapper--no-padding" id="maincontent">
-		<div id="contentinner" class="nhsuk-width-container">
+		<div id="contentinner" class="nhsuk-width-container<?php if( $full_width_template ){ echo ' nhsuk-width-container--full'; } ?>">
 			<?php flush(); ?>
 
