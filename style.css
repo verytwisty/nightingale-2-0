@@ -12242,7 +12242,7 @@ textarea:focus, #login #loginform .user-login:focus, #login #loginform .user_pas
 }
 
 .nhsuk-header--organisation .nhsuk-header__logo .nhsuk-header__link:hover {
-  box-shadow: 0 0 0 4px #ffcd60;
+  box-shadow: 0 0 0 4px #ffb81C;
 }
 
 /*
@@ -12312,6 +12312,10 @@ aside#secondary > section {
 
 .nhsuk-icon__arrow-right-circle {
   vertical-align: middle;
+}
+
+.nhsuk-width-container--full #contentinner.nhsuk-width-container {
+  max-width: 100%;
 }
 
 #secondary section {
