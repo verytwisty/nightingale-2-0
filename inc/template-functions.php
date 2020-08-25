@@ -2,9 +2,9 @@
 /**
  * Functions which enhance the theme by hooking into WordPress
  *
- * @package Nightingale
+ * @package   Nightingale
  * @copyright NHS Leadership Academy, Tony Blacker
- * @version 1.1 21st August 2019
+ * @version   1.1 21st August 2019
  */
 
 /**
@@ -51,7 +51,7 @@ if ( ! function_exists( 'nightingale_get_header_style' ) ) {
 	 */
 	function nightingale_get_header_style() {
 
-		$themeoptions_header_style = esc_attr( get_theme_mod( 'theme-header-style', 'default' ) );
+		$themeoptions_header_style = get_theme_mod( 'theme-header-style', 'default' );
 
 		if ( 'default' === $themeoptions_header_style ) {
 			$default_position = 'page-header-default';
@@ -63,119 +63,134 @@ if ( ! function_exists( 'nightingale_get_header_style' ) ) {
 	}
 }
 
-// remove "type" from script and style tags - not needed for html 5 validation.
-add_filter( 'script_loader_tag', 'nightingale__remove_type', 10, 3 );
-add_filter( 'style_loader_tag', 'nightingale__remove_type', 10, 3 );  // Ignore the $media argument to allow for a common function.
+/*
+ * Add excerpt ability to posts so the excerpt can be used in search results.
+ */
+add_post_type_support( 'page', 'excerpt' );
 
 /**
- * Clean Header Output for W3C compliance
+ * Adds Correct Class to excerpt paragraph tag
  *
- * @param string $markup The original text.
- * @param string $handle What are we looking for.
- * @param string $href What is the link to it.
+ * @param string $excerpt the_expert html.
+ */
+function nightingale_add_class_to_excerpt( $excerpt ) {
+	if ( is_admin() ) {
+		return $excerpt;
+	}
+
+	return str_replace( '<p>', '<p class="nhsuk-promo__description">', $excerpt );
+}
+
+add_filter( 'the_excerpt', 'nightingale_add_class_to_excerpt', 10 );
+
+/**
+ * Shortens the excerpt to 20 char
  *
- * @return mixed
+ * @param int $length length to shorten content to.
  */
-function nightingale__remove_type( $markup, $handle, $href ) {
+function nightingale_shorten_excerpt( $length ) {
+	if ( is_admin() ) {
+		return $length;
+	}
 
-	// Remove the 'type' attribute.
-	$markup = str_replace( " type='text/javascript'", '', $markup );
-	$markup = str_replace( " type='text/css'", '', $markup );
-
-	return $markup;
+	return 20;
 }
 
-// Store and process wp_head output to operate on inline scripts and styles.
-add_action( 'wp_head', 'nightingale__wp_head_ob_start', 0 );
+add_filter( 'excerpt_length', 'nightingale_shorten_excerpt', 10 );
 
 /**
- * Start outputting the Head
+ * Adds the readmore link to excerpts
+ *
+ * @param string $more the default more string.
  */
-function nightingale__wp_head_ob_start() {
-	ob_start();
+function nightingale_excerpt_more( $more ) {
+	if ( is_admin() ) {
+		return $more;
+	}
+	global $post;
+	$link  = '';
+	$title = get_the_title( $post->ID );
+	return nightingale_read_more_posts( $title, $link );
 }
-
-add_action( 'wp_head', 'nightingale__wp_head_ob_end', 10000 );
-
-/**
- * Clean up the head output HTML to be W3C compliant.
- */
-function nightingale__wp_head_ob_end() {
-	$wp_head_markup = ob_get_contents();
-	ob_end_clean();
-
-	// Remove the 'type' attribute. Note the use of single and double quotes.
-	$wp_head_markup = str_replace( " type='text/javascript'", '', $wp_head_markup );
-	$wp_head_markup = str_replace( ' type="text/javascript"', '', $wp_head_markup );
-	$wp_head_markup = str_replace( ' type="text/css"', '', $wp_head_markup );
-	$wp_head_markup = str_replace( " type='text/css'", '', $wp_head_markup );
-	echo $wp_head_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-
-}
-
-// end remove "type" from script and style tags.
-
-/**
- * Customise the read more link
- */
-function nightingale_read_more() {
-	$post_id = get_the_ID();
-
-	return '<div class="nhsuk-action-link">
-  <a class="nhsuk-action-link__link" href="' . get_permalink() . '"><svg class="nhsuk-icon nhsuk-icon__arrow-right-circle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
-	  <path d="M0 0h24v24H0z" fill="none"></path>
-	  <path d="M12 2a10 10 0 0 0-9.95 9h11.64L9.74 7.05a1 1 0 0 1 1.41-1.41l5.66 5.65a1 1 0 0 1 0 1.42l-5.66 5.65a1 1 0 0 1-1.41 0 1 1 0 0 1 0-1.41L13.69 13H2.05A10 10 0 1 0 12 2z"></path>
-	</svg><span class="nhsuk-action-link__text">read more</span><span class="nhsuk-u-visually-hidden"> about ' . get_the_title() . '</span></a></div>';
-}
-
-
-add_filter( 'excerpt_more', 'nightingale_read_more', 10, 1 );
-
+add_filter( 'excerpt_more', 'nightingale_excerpt_more' );
 /**
  * Customise the read more link.
  *
  * @param string $title The title for the link (used in visually hidden area for screen readers to better describe the link).
- * @param string $link The href of the resource being linked to.
- *
- * return string output html.
+ * @param string $link  The href of the resource being linked to.
+ *                      return string output html.
  */
 function nightingale_read_more_posts( $title, $link ) {
 
-	return '<div class="nhsuk-action-link">
-  <a class="nhsuk-action-link__link" href="' . $link . '"><svg class="nhsuk-icon nhsuk-icon__arrow-right-circle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+	$readmorelink = '<div class="nhsuk-action-link nhsuk-readmore">';
+	if ( '' !== $link ) {
+		$readmorelink .= '<a class="nhsuk-action-link__link" href="' . $link . '">';
+	}
+	$readmorelink .= '<span class="nhsuk-action-link__text">' . esc_html__( 'read more ', 'nightingale' ) . '</span><span class="nhsuk-u-visually-hidden">' . esc_html__( ' about ', 'nightingale' ) . $title . '</span><svg class="nhsuk-icon nhsuk-icon__arrow-right-circle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
 	  <path d="M0 0h24v24H0z" fill="none"></path>
 	  <path d="M12 2a10 10 0 0 0-9.95 9h11.64L9.74 7.05a1 1 0 0 1 1.41-1.41l5.66 5.65a1 1 0 0 1 0 1.42l-5.66 5.65a1 1 0 0 1-1.41 0 1 1 0 0 1 0-1.41L13.69 13H2.05A10 10 0 1 0 12 2z"></path>
-	</svg><span class="nhsuk-action-link__text">read more</span><span class="nhsuk-u-visually-hidden"> about ' . $title . '</span></a></div>';
+	</svg>';
+	if ( '' !== $link ) {
+		$readmorelink .= '</a>';
+	}
+	$readmorelink .= '</div>';
+	return $readmorelink;
 
 }
 
 /**
- * Add Google Analytics directly into the theme customiser for brevity and simplicity. This really shouldn't need a plugin.
+ * Whether show sidebar returns true or false
  */
-function nightingale_add_google_analytics() {
-	$tag = get_theme_mod( 'google-utm' );
-	echo '<script>
-		  (function(a,b,c){var d=a.history,e=document,f=navigator||{},g=localStorage,
-		  h=encodeURIComponent,i=d.pushState,k=function(){return Math.random().toString(36)},
-		  l=function(){return g.cid||(g.cid=k()),g.cid},m=function(r){var s=[];for(var t in r)
-		  r.hasOwnProperty(t)&&void 0!==r[t]&&s.push(h(t)+"="+h(r[t]));return s.join("&")},
-		  n=function(r,s,t,u,v,w,x){var z="https://www.google-analytics.com/collect",
-		  A=m({v:"1",ds:"web",aip:c.anonymizeIp?1:void 0,tid:b,cid:l(),t:r||"pageview",
-		  sd:c.colorDepth&&screen.colorDepth?screen.colorDepth+"-bits":void 0,dr:e.referrer||
-		  void 0,dt:e.title,dl:e.location.origin+e.location.pathname+e.location.search,ul:c.language?
-		  (f.language||"").toLowerCase():void 0,de:c.characterSet?e.characterSet:void 0,
-		  sr:c.screenSize?(a.screen||{}).width+"x"+(a.screen||{}).height:void 0,vp:c.screenSize&&
-		  a.visualViewport?(a.visualViewport||{}).width+"x"+(a.visualViewport||{}).height:void 0,
-		  ec:s||void 0,ea:t||void 0,el:u||void 0,ev:v||void 0,exd:w||void 0,exf:"undefined"!=typeof x&&
-		  !1==!!x?0:void 0});if(f.sendBeacon)f.sendBeacon(z,A);else{var y=new XMLHttpRequest;
-		  y.open("POST",z,!0),y.send(A)}};d.pushState=function(r){return"function"==typeof d.onpushstate&&
-		  d.onpushstate({state:r}),setTimeout(n,c.delay||10),i.apply(d,arguments)},n(),
-		  a.ma={trackEvent:function o(r,s,t,u){return n("event",r,s,t,u)},
-		  trackException:function q(r,s){return n("exception",null,null,null,null,r,s)}}})
-		  (window,"' . $tag . '",{anonymizeIp:true,colorDepth:true,characterSet:true,screenSize:true,language:true});
-		</script>';
+function nightingale_show_sidebar() {
+	return ( 'true' === get_theme_mod( 'blog_sidebar' ) );
 }
 
-if ( get_theme_mod( 'google-utm' ) !== 'UA-' ) {
-	add_action( 'wp_footer', 'nightingale_add_google_analytics', 1000 );
+/**
+ * Determine if page should have sidebar on left or right, and return additional class if required.
+ *
+ * @param string $sidebar location string for sidebar.
+ */
+function nightingale_sidebar_location( $sidebar ) {
+	$sidebar_location = get_theme_mod( 'sidebar_location', 'right' );
+	$sidefloat        = 'contentleft';
+	if ( 'right' !== $sidebar_location ) {
+		if ( is_active_sidebar( $sidebar ) ) {
+			$sidefloat = ' contentright';
+		}
+	}
+
+	return $sidefloat;
 }
+
+/**
+ * Get the custom colour name to return into the body class if required
+ *
+ * @param array $classes the pre-existing classes for a WordPress page.
+ */
+function nightingale_custom_page_colour( $classes ) {
+	$colour = get_theme_mod( 'theme_colour', 'nhs_blue' );
+	if ( 'nhs_blue' !== $colour ) {
+		$colour_array      = array(
+			'005eb8' => 'nhs-blue',
+			'003087' => 'dark-blue',
+			'0072ce' => 'bright-blue',
+			'768692' => 'mid-grey',
+			'425563' => 'dark-grey',
+			'231f20' => 'black',
+			'330072' => 'purple',
+			'ae2573' => 'pink',
+			'704c9c' => 'light-purple',
+			'da291c' => 'emergency-services-red',
+			'006747' => 'dark-green',
+			'78be20' => 'light-green',
+			'00a499' => 'aqua-green',
+			'0b0c0c' => 'gds-black',
+		);
+		$theme_colour_name = 'page-colour--' . $colour_array[ $colour ];
+		$classes[]         = $theme_colour_name;
+	}
+
+	return $classes;
+}
+
+add_filter( 'body_class', 'nightingale_custom_page_colour' );

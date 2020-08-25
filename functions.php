@@ -1,12 +1,11 @@
 <?php
 /**
- * Nightingale 2.0 functions and definitions
+ * Nightingale  functions and definitions
  *
- * @link https://developer.wordpress.org/themes/basics/theme-functions/
- *
- * @package Nightingale
+ * @link      https://developer.wordpress.org/themes/basics/theme-functions/
+ * @package   Nightingale
  * @copyright NHS Leadership Academy, Tony Blacker
- * @version 2.0.5 19th November 2019
+ * @version   2.2.0 28th July 2020
  */
 
 /**
@@ -15,22 +14,21 @@
  */
 require get_template_directory() . '/inc/class-nightingale-subpages-widget.php';
 
+
+/**
+ * Add in customizer sanitizer functions
+ */
+require get_template_directory() . '/inc/sanitization-callbacks.php';
+
+
 /**
  * Sets up theme defaults and registers support for various WordPress features.
- *
  * Note that this function is hooked into the after_setup_theme hook, which
  * runs before the init hook. The init hook is too late for some features, such
  * as indicating support for post thumbnails.
  */
 function nightingale_setup() {
-	/*
-	 * Make theme available for translation.
-	 * Translations can be filed in the /languages/ directory.
-	 * If you're building a theme based on Nightingale 2.0, use a find and replace
-	 * to change 'nightingale' to the name of your theme in all the template files.
-	 */
-	load_theme_textdomain( 'nightingale', get_template_directory() . '/languages' );
-
+	load_theme_textdomain( 'nightingale' );
 	// Add default posts and comments RSS feed links to head.
 	add_theme_support( 'automatic-feed-links' );
 
@@ -68,6 +66,8 @@ function nightingale_setup() {
 			'comment-list',
 			'gallery',
 			'caption',
+			'script',
+			'style',
 		)
 	);
 
@@ -113,12 +113,13 @@ function nightingale_setup() {
 		'widgets'    => array(
 			// Place pre-defined widget in the sidebar area.
 			'sidebar-1' => array(
-				'Nightingale_Subpages_Widget',
+				'search',
+				'subpages-widget',
 			),
 			'404-error' => array(
-				'WP_Widget_Archives',
-				'WP_Widget_Tag_Cloud',
-				'WP_Widget_Recent_Posts',
+				'archives',
+				'tag_cloud',
+				'recent_posts',
 			),
 		),
 		'posts'      => array(
@@ -161,7 +162,6 @@ function nightingale_setup() {
 
 	remove_theme_support( 'custom-header' );
 	remove_theme_support( 'custom-background' );
-	unregister_widget( 'WP_Widget_Search' ); // taking out search widget as included in header by default.
 
 }
 
@@ -169,7 +169,6 @@ add_action( 'after_setup_theme', 'nightingale_setup' );
 
 /**
  * Set the content width in pixels, based on the theme's design and stylesheet.
- *
  * Priority 0 to make it available to lower priority callbacks.
  *
  * @global int $content_width
@@ -193,10 +192,21 @@ function nightingale_widgets_init() {
 		array(
 			'name'          => esc_html__( 'Sidebar', 'nightingale' ),
 			'id'            => 'sidebar-1',
-			'description'   => esc_html__( 'Elements to show in the sidebar. each widget will show as a panel.', 'nightingale' ),
-			'before_widget' => '<section id="%1$s" class="widget %2$s">',
+			'description'   => esc_html__( 'Elements to show in the sidebar. Each widget will show as a panel. If empty you will have a blank right hand panel.', 'nightingale' ),
+			'before_widget' => '<section id="%1$s" class="nhsuk-related-nav %2$s">',
 			'after_widget'  => '</section>',
-			'before_title'  => '<h2 class="widget-title">',
+			'before_title'  => '<h2 class="nhsuk-related-nav__heading">',
+			'after_title'   => '</h2>',
+		)
+	);
+	register_sidebar(
+		array(
+			'name'          => esc_html__( 'Post Sidebar', 'nightingale' ),
+			'id'            => 'sidebar-2',
+			'description'   => esc_html__( 'Elements to show in the post sidebar. Each widget will show as a panel. If empty you will have a blank right hand panel.', 'nightingale' ),
+			'before_widget' => '<section id="%1$s" class="nhsuk-related-nav %2$s">',
+			'after_widget'  => '</section>',
+			'before_title'  => '<h2 class="nhsuk-related-nav__heading">',
 			'after_title'   => '</h2>',
 		)
 	);
@@ -204,7 +214,7 @@ function nightingale_widgets_init() {
 		array(
 			'name'          => esc_html__( 'Footer Region', 'nightingale' ),
 			'id'            => 'footer-region',
-			'description'   => esc_html__( 'Widgets to show in the footer zone.', 'nightingale' ),
+			'description'   => esc_html__( 'Widgets to show in the footer zone. By default the footer will have a copyright notice and the footer menu (if configured) only.', 'nightingale' ),
 			'before_widget' => '<section id="%1$s" class="widget %2$s">',
 			'after_widget'  => '</section>',
 		)
@@ -214,9 +224,9 @@ function nightingale_widgets_init() {
 			'name'          => '404 Page',
 			'id'            => '404-error',
 			'description'   => esc_html__( 'Content for your 404 error page goes here.', 'nightingale' ),
-			'before_widget' => '<div id="%1$s" class="%2$s nhsuk-panel-with-label">',
+			'before_widget' => '<div id="%1$s" class="%2$s nhsuk-related-nav">',
 			'after_widget'  => '</div>',
-			'before_title'  => '<h3 class="nhsuk-panel-with-label__label">',
+			'before_title'  => '<h3 class="nhsuk-related-nav__heading">',
 			'after_title'   => '</h3>',
 		)
 	);
@@ -224,18 +234,16 @@ function nightingale_widgets_init() {
 
 add_action( 'widgets_init', 'nightingale_widgets_init' );
 
+
 /**
  * Enqueue scripts and styles.
  */
 function nightingale_scripts() {
-	wp_enqueue_style( 'nightingale-style', get_template_directory_uri() . '/style.min.css', array(), '20191012' );
-
-	wp_enqueue_script( 'nightingale-navigation', get_template_directory_uri() . '/js/navigation.js', '', '20190828', true );
-
+	wp_enqueue_style( 'nightingale-style', get_template_directory_uri() . '/style.min.css', array(), '20202704' );
+	wp_enqueue_style( 'nightingale-page-colours', get_template_directory_uri() . '/page-colours.min.css', array(), '20202704' );
 	wp_enqueue_script( 'nightingale-skip-link-focus-fix', get_template_directory_uri() . '/js/skip-link-focus-fix.js', '', '20190828', true );
-
 	wp_enqueue_script( 'nightingale-nhs-library', get_template_directory_uri() . '/js/nhsuk.min.js', '', '20190828', true );
-
+	wp_enqueue_script( 'nightingale-navigation', get_template_directory_uri() . '/js/navigation.js', '', '20190828', true );
 	if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
 		wp_enqueue_script( 'comment-reply' );
 	}
@@ -244,7 +252,7 @@ function nightingale_scripts() {
 add_action( 'wp_enqueue_scripts', 'nightingale_scripts' );
 
 /**
- * Force download of dependancy plugins
+ * Encourage download of dependancy plugins
  */
 require_once get_template_directory() . '/inc/class-tgm-plugin-activation.php';
 
@@ -258,51 +266,24 @@ function nightingale_register_required_plugins() {
 	 * If the source is NOT from the .org repo, then source is also required.
 	 */
 	$plugins = array(
-		// Load in Gutenberg plugin directly from WP repo.
-		array(
-			'name'               => 'Gutenberg',
-			// The plugin name.
-			'slug'               => 'gutenberg',
-			// The plugin slug (typically the folder name).
-			'source'             => '',
-			// The plugin source.
-			'required'           => false,
-			// If false, the plugin is only 'recommended' instead of required.
-			'version'            => '6.3.0',
-			// E.g. 1.0.0. If set, the active plugin must be this version or higher. If the plugin version is higher than the plugin version installed, the user will be notified to update the plugin.
-			'force_activation'   => true,
-			// If true, plugin is activated upon theme activation and cannot be
-			// deactivated until theme switch.
-			'force_deactivation' => false,
-			// If true, plugin is deactivated upon theme switch, useful for theme-specific plugins.
-			'external_url'       => '',
-			// If set, overrides default API URL and points to an external URL.
-			'is_callable'        => '',
-			// If set, this callable will be be checked for availability to determine if a plugin is active.
-		),
 		// Load in NHSBlocks plugin directly from WP repo.
 		array(
-			'name'               => 'NHS Blocks',
-			'slug'               => 'nhsblocks',
-			'source'             => '',
-			'required'           => false,
-			'version'            => '1.0.1',
-			'force_activation'   => true,
-			'force_deactivation' => false,
-			'external_url'       => '',
-			'is_callable'        => '',
+			'name'         => 'NHS Blocks',
+			'slug'         => 'nhsblocks',
+			'source'       => '',
+			'required'     => false,
+			'version'      => '1.1.6',
+			'external_url' => '',
+			'is_callable'  => '',
 		),
-		// Optional activate Cookie Notice plugin.
 		array(
-			'name'               => 'Cookie Notice for GDPR',
-			'slug'               => 'cookie-notice',
-			'source'             => '',
-			'required'           => false,
-			'version'            => '1.2.46',
-			'force_activation'   => false,
-			'force_deactivation' => false,
-			'external_url'       => '',
-			'is_callable'        => '',
+			'name'         => 'Nightingale Companion',
+			'slug'         => 'nightingale-companion',
+			'source'       => '',
+			'required'     => false,
+			'version'      => '1.0.2',
+			'external_url' => '',
+			'is_callable'  => '',
 		),
 	);
 
@@ -318,13 +299,13 @@ function nightingale_register_required_plugins() {
 		// Menu slug.
 		'has_notices'  => true,
 		// Show admin notices or not.
-		'dismissable'  => false,
+		'dismissable'  => true,
 		// If false, a user cannot dismiss the nag message.
-		'dismiss_msg'  => 'We recommend you install these plugin to add the full NHS Frontend library range of components to your wordpress editor. ',
+		'dismiss_msg'  => '',
 
 		//
 		// If 'dismissable' is false, this message will be output at top of nag.
-		'is_automatic' => true,
+		'is_automatic' => false,
 		// Automatically activate plugins after installation or not.
 		'message'      => '',
 		// Message to output right before the plugins table.
@@ -334,49 +315,6 @@ function nightingale_register_required_plugins() {
 	tgmpa( $plugins, $config );
 }
 
-add_action( 'admin_notices', 'nightingale_admin_notice_demo_data' );
-/**
- * Function to add in nag notice and welcome message on theme activation.
- */
-function nightingale_admin_notice_demo_data() {
-
-	// Hide bizberg admin message.
-	if ( ! empty( $_GET['status'] ) && 'nightingale_hide_msg' === $_GET['status'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		update_option( 'nightingale_hide_msg', true );
-	}
-
-	$status = get_option( 'nightingale_hide_msg' );
-	if ( true === $status ) {
-		return;
-	}
-
-	if ( ! is_plugin_active( 'gutenberg/gutenberg.php' ) ) {
-		$my_theme   = wp_get_theme();
-		$theme_name = $my_theme->get( 'Name' );
-		echo '<div id="message" class="notice-info settings-error notice is-dismissible"><p>';
-		echo '<svg class="nhsuk-logo nhsuk-logo--white" style="width: 80px; height: 32px;"
-				 xmlns="http://www.w3.org/2000/svg" role="presentation" focusable="false" viewBox="0 0 40 16">
-				<path fill="#fff" d="M0 0h40v16H0z"></path>
-				<path fill="#fff" d="M0 0h40v16H0z"></path>
-				<path fill="#005eb8"
-					  d="M3.9 1.5h4.4l2.6 9h.1l1.8-9h3.3l-2.8 13H9l-2.7-9h-.1l-1.8 9H1.1M17.3 1.5h3.6l-1 4.9h4L25 1.5h3.5l-2.7 13h-3.5l1.1-5.6h-4.1l-1.2 5.6h-3.4M37.7 4.4c-.7-.3-1.6-.6-2.9-.6-1.4 0-2.5.2-2.5 1.3 0 1.8 5.1 1.2 5.1 5.1 0 3.6-3.3 4.5-6.4 4.5-1.3 0-2.9-.3-4-.7l.8-2.7c.7.4 2.1.7 3.2.7s2.8-.2 2.8-1.5c0-2.1-5.1-1.3-5.1-5 0-3.4 2.9-4.4 5.8-4.4 1.6 0 3.1.2 4 .6"></path>
-				<image src="https://assets.nhs.uk/images/nhs-logo.png" xlink:href=""></image>
-			</svg>';
-		echo '<strong style="font-size: 20px; padding-bottom: 10px; display: block;">';
-		printf(
-			/* translators: 1: theme name. */
-			esc_html__(
-				'Thank you for installing %1$s',
-				'nightingale'
-			),
-			esc_html( $theme_name )
-		);
-		echo '</strong>';
-		echo '<p>' . esc_html__( 'This will give your website a professional NHS themed template, with all NHS Frontend components available to you. The theme is developed and maintained by the digital team at NHS Leadership Academy, and is intended for use solely on sites within the NHS in the UK', 'nightingale' ) . '</p>';
-		echo '<p><b>' . esc_html__( 'Install all recommended plugins below to get started.', 'nightingale' ) . '</b></p>';
-		echo '</p></div>';
-	}
-}
 
 /**
  * Custom template tags for this theme.
@@ -402,11 +340,6 @@ require get_template_directory() . '/inc/custom-gutenberg.php';
 require get_template_directory() . '/inc/customizer.php';
 
 /**
- * Login Screen
- */
-require get_template_directory() . '/inc/login.php';
-
-/**
  * Pagination
  */
 require get_template_directory() . '/inc/pagination.php';
@@ -417,13 +350,27 @@ require get_template_directory() . '/inc/pagination.php';
 require get_template_directory() . '/inc/breadcrumbs.php';
 
 /**
+ * Color Picker.
+ */
+require get_template_directory() . '/inc/color-picker.php';
+
+/**
+ * Color Picker.
+ */
+require get_template_directory() . '/inc/last-reviewed.php';
+
+/**
  * Create an array of active plugins.
  */
 
 $active_plugins = apply_filters( 'active_plugins', get_option( 'active_plugins' ) );
 
+
 /**
  * Gravity Forms style over-ride.
+ * N.B. This is not a plugin, nor does it provide any plugin-like changes. This is a theme file for
+ * the Gravity Forms plugin so any content generated by Gravity Forms fits in to this theme.
+ * The check around the require is to see if the plugin is active on this install
  */
 if ( in_array( 'gravityforms/gravityforms.php', $active_plugins, true ) ) {
 	if ( ! is_admin() ) {
@@ -431,23 +378,55 @@ if ( in_array( 'gravityforms/gravityforms.php', $active_plugins, true ) ) {
 	}
 }
 
+
+/**
+ * Formidable Forms style over-ride.
+ * N.B. This is not a plugin, nor does it provide any plugin-like changes. This is a theme file for
+ * the Formidable Forms plugin so any content generated by Formidable Forms fits in to this theme.
+ * The check around the require is to see if the plugin is active on this install
+ * N.B - You must set formidaable forms to 'Do not use formidable styles' for it to kick in
+ */
+if ( in_array( 'formidable/formidable.php', $active_plugins, true ) ) {
+	if ( ! is_admin() ) {
+		require get_template_directory() . '/inc/formidable.php';
+	}
+}
+
 /**
  * LearnDash style over-ride.
+ * N.B. This is not a plugin, nor does it provide any plugin-like changes. This is a theme file for
+ * the LearnDash plugin so any content generated by LearnDash fits in to this theme.
+ * The check around the require is to see if the plugin is active on this install
  */
 if ( in_array( 'sfwd-lms/sfwd-lms.php', $active_plugins, true ) ) {
 	if ( ! is_admin() ) {
 		require get_template_directory() . '/inc/learndash.php';
 	}
 }
-/**
- * Retina Ready Image code.
- */
-require get_template_directory() . '/inc/retina-images.php';
 
 /**
- * Performance Boosters - should be loaded as last element of functions file.
+ * Events Calendar style over-ride.
+ * N.B. This is not a plugin, nor does it provide any plugin-like changes. This is a theme file for
+ * the Events Calendar plugin so any content generated by Events Calendar fits in to this theme.
+ * The check around the require is to see if the plugin is active on this install
  */
-require get_template_directory() . '/inc/performance-optimisations.php';
+if ( in_array( 'the-events-calendar/the-events-calendar.php', $active_plugins, true ) ) {
+	if ( ! is_admin() ) {
+		require get_template_directory() . '/inc/events-calendar.php';
+	}
+}
+
+/*
+ * Google Tag Manager.
+ * N.B. This is not a plugin, nor does it provide any plugin-like changes. This is a file for
+ * the Google Tag Manager to fit it into the theme.
+ */
+
+if ( function_exists( 'gtm4wp_the_gtm_tag' ) ) {
+	if ( ! is_admin() ) {
+		require get_template_directory() . '/inc/google-tag-manager.php';
+	}
+}
 
 /**
  * Shove the critical path css directly into the header.
@@ -459,39 +438,9 @@ require get_template_directory() . '/inc/critical-style.php';
  */
 require get_template_directory() . '/inc/class-comment-author-role-label.php';
 
-add_filter( 'render_block', 'nightingale_latest_posts_block_filter', 10, 3 );
-
 /**
- * Amend the markup in the latest news block to bring in to NHSUK styling.
- *
- * @param string $block_content - the generated html from core block.
- * @param string $block - the name of the block.
- *
- * @return string $output - the amended html markup.
+ * Hijack core/posts block and force own output
  */
-function nightingale_latest_posts_block_filter( $block_content, $block ) {
-
-	if ( 'core/latest-posts' !== $block['blockName'] ) {
-		return $block_content;
-	}
-	$output = '<div class="nhsuk-grid-row nightingale-latest-news"><div class="nhsuk-panel-group">';
-	$dom    = new DOMDocument();
-	libxml_use_internal_errors( true );
-	$dom->loadHTML( $block_content );
-	$lis = $dom->getElementsByTagName( 'li' );
-	foreach ( $lis as $li ) {
-		$output  .= '<div class="nhsuk-grid-column-one-third nhsuk-panel-group__item"><div class="nhsuk-panel">';
-		$titles   = $li->getElementsByTagName( 'a' );
-		$title    = $titles->item( 0 )->nodeValue;
-		$link     = $titles->item( 0 )->getAttribute( 'href' );
-		$contents = $li->getElementsByTagName( 'div' );
-		$excerpt  = $contents->item( 0 )->nodeValue;
-		$output  .= '<h3><a href="' . $link . '"> ' . $title . '</a></h3>';
-		$output  .= '<p>' . substr( $excerpt, 0, - 13 ) . '</p>';
-		$output  .= nightingale_read_more_posts( $title, $link );
-		$output  .= '</div></div>';
-	}
-	$output .= '</div></div>';
-
-	return $output;
+if ( ! is_admin() ) {
+	require get_template_directory() . '/inc/dynamic-blocks.php';
 }

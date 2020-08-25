@@ -2,17 +2,41 @@
 /**
  * Set the theme colors
  *
- * @package Nightingale-2-0
+ * @package   Nightingale-2-0
  * @copyright NHS Leadership Academy, Tony Blacker
- * @version 1.1 21st August 2019
+ * @version   1.1 21st August 2019
  */
 
+/**
+ * Setup the colours for our theme.
+ */
+function nightingale_get_theme_colours() {
+	return array(
+		''       => esc_html__( 'Inherit site wide colour settings', 'nightingale' ),
+		'005eb8' => esc_html__( 'NHS Blue', 'nightingale' ),
+		'003087' => esc_html__( 'Dark Blue', 'nightingale' ),
+		'0072ce' => esc_html__( 'Bright Blue', 'nightingale' ),
+		'768692' => esc_html__( 'Mid Grey', 'nightingale' ),
+		'425563' => esc_html__( 'Dark Grey', 'nightingale' ),
+		'231f20' => esc_html__( 'Black', 'nightingale' ),
+		'330072' => esc_html__( 'Purple', 'nightingale' ),
+		'ae2573' => esc_html__( 'Pink', 'nightingale' ),
+		'704c9c' => esc_html__( 'Light Purple', 'nightingale' ),
+		'da291c' => esc_html__( 'Emergency Services Red', 'nightingale' ),
+		'006747' => esc_html__( 'Dark Green', 'nightingale' ),
+		'78be20' => esc_html__( 'Light Green', 'nightingale' ),
+		'00a499' => esc_html__( 'Aqua Green', 'nightingale' ),
+		'0b0c0c' => esc_html__( 'GDS Black', 'nightingale' ),
+	);
+}
+
+
 // -- Disable Custom Colors
-add_action( 'after_setup_theme', 'prefix_register_colors' );
+add_action( 'after_setup_theme', 'nightingale_prefix_register_colors' );
 /**
  * Make an array of colours we want to show.
  */
-function prefix_register_colors() {
+function nightingale_prefix_register_colors() {
 
 	add_theme_support( 'disable-custom-colors' );
 	add_theme_support(
@@ -115,7 +139,7 @@ function prefix_register_colors() {
 /**
  * Get the colors formatted for use with Iris, Automattic's color picker.
  */
-function output_the_colors() {
+function nightingale_output_the_colors() {
 
 	// get the colors.
 	$color_palette = current( (array) get_theme_support( 'editor-color-palette' ) );
@@ -142,7 +166,7 @@ function output_the_colors() {
 /**
  * Get the colors formatted for use with TinyMCE.
  */
-function output_tinymce_colors() {
+function nightingale_output_tinymce_colors() {
 
 	// get the colors.
 	$color_palette = current( (array) get_theme_support( 'editor-color-palette' ) );
@@ -173,13 +197,13 @@ function output_tinymce_colors() {
 /**
  * Put the array of colours into the TinyMCE editor.
  *
- * @param array $init  the array of colours coming in.
+ * @param array $init the array of colours coming in.
  *
  * @return array $init the formatted array returned back.
  */
 function nightingale_mce4_options( $init ) {
 
-	$custom_colours = output_tinymce_colors();
+	$custom_colours = nightingale_output_tinymce_colors();
 
 	// build colour grid default+custom colors.
 	$init['textcolor_map'] = '[' . $custom_colours . ']';

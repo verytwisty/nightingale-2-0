@@ -12,28 +12,21 @@
 get_header();
 ?>
 
-	<div id="primary" class=" nhsuk-grid-row 123">
-		<div class="nhsuk-grid-column-full">
+	<div id="primary" class=" nhsuk-grid-row nhsuk-width-restrict">
+		<div class="
+		<?php
+		if ( nightingale_show_sidebar() ) :
+			echo 'nhsuk-grid-column-two-thirds ';
+			echo nightingale_sidebar_location( 'sidebar-2' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		endif;
+		?>
+		single">
 
 			<?php
 			while ( have_posts() ) :
 				the_post();
 
 				get_template_part( 'template-parts/content', get_post_type() );
-				$defaults = array(
-					'before'           => '<p>' . __( 'Pages:', 'nightingale' ),
-					'after'            => '</p>',
-					'link_before'      => '',
-					'link_after'       => '',
-					'next_or_number'   => 'number',
-					'separator'        => ' ',
-					'nextpagelink'     => __( 'Next page', 'nightingale' ),
-					'previouspagelink' => __( 'Previous page', 'nightingale' ),
-					'pagelink'         => '%',
-					'echo'             => 1,
-				);
-
-				wp_link_pages( $defaults );
 				nightingale_get_prev_next();
 
 				// If comments are open or we have at least one comment, load up the comment template.
@@ -45,9 +38,13 @@ get_header();
 			?>
 
 		</div>
+		<?php
+		if ( nightingale_show_sidebar() ) :
+			get_sidebar( 'blog' );
+		endif;
+		?>
 
 	</div><!-- #primary -->
 
 <?php
-get_sidebar();
 get_footer();

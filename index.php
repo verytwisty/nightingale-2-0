@@ -15,36 +15,62 @@
  */
 
 get_header();
+
+$sidebar = nightingale_show_sidebar();
+
 ?>
 
-	<div id="primary" class=" nhsuk-grid-row">
-		<div class="nhsuk-grid-column-two-thirds">
+	<div id="primary" class="clear">
+
+		<?php
+
+		if ( is_home() && ! is_front_page() ) :
+			?>
+			<header>
+				<h1 class="nhsuk-heading-xl"><?php single_post_title(); ?></h1>
+			</header>
+			<?php
+		endif;
+		?>
+
+		<div class="
+		<?php
+		if ( $sidebar ) :
+			echo 'nhsuk-grid-column-two-thirds ';
+			echo nightingale_sidebar_location( 'sidebar-2' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		endif;
+		?>
+		index">
 
 			<?php
 			if ( have_posts() ) :
+				?>
 
-				if ( is_home() && ! is_front_page() ) :
-					?>
-					<header>
-						<h1 class="page-title screen-reader-text"><?php single_post_title(); ?></h1>
-					</header>
+
+				<div class="nhsuk-grid-row nhsuk-promo-group">
+
 					<?php
-				endif;
 
-				/* Start the Loop */
-				while ( have_posts() ) :
-					the_post();
+					/* Start the Loop */
+					while ( have_posts() ) :
+						the_post();
 
-					/*
-					 * Include the Post-Type-specific template for the content.
-					 * If you want to override this in a child theme, then include a file
-					 * called content-___.php (where ___ is the Post Type name) and that will be used instead.
-					 */
-					get_template_part( 'template-parts/content', get_post_type() );
+						/*
+						 * Include the Post-Type-specific template for the content.
+						 * If you want to override this in a child theme, then include a file
+						 * called content-___.php (where ___ is the Post Type name) and that will be used instead.
+						 */
+						get_template_part( 'template-parts/content', get_post_type() );
 
-				endwhile;
+					endwhile;
 
-				the_posts_navigation();
+					?>
+
+				</div><!-- #nhsuk-panel-group nhsuk-grid-column-full -->
+
+				<?php
+
+				nightingale_archive_pagination();
 
 				else :
 
@@ -52,12 +78,13 @@ get_header();
 
 			endif;
 				?>
+
 		</div>
-		<div class="nhsuk-grid__item nhsuk-grid-column-one-third">
-			<?php
-			get_sidebar();
-			?>
-		</div>
+		<?php
+		if ( $sidebar ) :
+			get_sidebar( 'blog' );
+		endif;
+		?>
 
 	</div><!-- #primary -->
 
